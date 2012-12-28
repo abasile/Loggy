@@ -187,7 +187,7 @@ public class MainActivity extends Activity {
     }
     
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == ACTION_CAMERA && resultCode == RESULT_OK && image != null) {
+        if (requestCode == ACTION_CAMERA && (resultCode == RESULT_OK || resultCode == RESULT_CANCELED) && image != null) {
             Intent intent = new Intent(CAMERA_INTENT);
             intent.putExtra("image", image.getAbsolutePath());
             sendBroadcast(intent);

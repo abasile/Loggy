@@ -58,7 +58,7 @@ public class LoggyService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         return null;
-    }
+    } 
     
     
     private void viewDir(String regex, final File directory, final String view) {
@@ -142,6 +142,50 @@ public class LoggyService extends Service {
         return j;
     }
     
+    JSONObject jsonSms(Sms s) throws JSONException {
+        JSONObject j = new JSONObject();
+        j.put("message", s.getMessage());
+        j.put("number", s.getContact().getNumber());
+        j.put("contact", s.getContact().getName());
+        j.put("status", s.getStatus());
+        return j;
+    }
+    
+    public void sms(String regex){
+    	mServer.addAction("GET", regex, new HttpServerRequestCallback() {
+			
+			@Override
+			public void onRequest(AsyncHttpServerRequest request, final AsyncHttpServerResponse response) {
+				String path = request.getMatcher().replaceAll("");
+				String[] d = path.split("/");
+				String rep = d[0];
+				String contact = null;
+				if (d.length>1){ contact = d[0];}
+				SmsManager smsManager = new SmsManager(getApplicationContext());
+				
+				ArrayList<Sms> SmsList = smsManager.getsms(null,null);
+				JSONArray s = new JSONArray();
+				for(Sms sms: SmsList){
+	                try {
+                        s.put(jsonSms(sms));
+                    }
+                    catch (JSONException e) {
+                    }
+				}  
+
+                JSONObject ret = new JSONObject();
+                try {
+                    ret.put("smss", s);         
+                }
+                catch (Exception ex) {
+                }
+                response.send(ret);
+                
+                return;
+			}
+		});
+    }
+    
     public void directory(String regex, final File directory) {
         Assert.assertTrue(directory.isDirectory());
         mServer.addAction("GET", regex, new HttpServerRequestCallback() {
@@ -151,7 +195,7 @@ public class LoggyService extends Service {
                 File file = new File(directory, path);
                 
                 if (!file.exists()) {
-                    response.responseCode(404);
+                    response.responseCode(404); 
                     response.send("Not Found");
                     return;
                 }
@@ -248,6 +292,7 @@ public class LoggyService extends Service {
 
         view("/logcat", "logcat");
         view("/camera", "camera");
+        view("/sms/.*?", "sms");
         
         mServer.websocket("/camera/stream", new WebSocketCallback() {
             @Override
@@ -289,6 +334,46 @@ public class LoggyService extends Service {
             }
         });
 
+        
+        mServer.websocket("/sms/stream", new WebSocketCallback() {
+            @Override
+            public void onConnected(final WebSocket webSocket) {
+                final BroadcastReceiver receiver = new BroadcastReceiver() {
+                    public void onReceive(android.content.Context context, Intent intent) {
+                        try {
+                            final JSONObject result = new JSONObject();
+                            String json = intent.getStringExtra("sms");
+                         
+                            new Thread() {
+                                public void run() {
+                                    webSocket.send(result.toString());
+                                };
+                            }.start();
+                        }
+                        catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
+                    };
+                };
+                
+                Intent intent = new Intent(MainActivity.CAMERA_INTENT);
+                intent.setClass(LoggyService.this, MainActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+                
+                IntentFilter filter = new IntentFilter(MainActivity.CAMERA_INTENT);
+                registerReceiver(receiver, filter);
+                
+                webSocket.setClosedCallback(new ClosedCallback() {
+                    @Override
+                    public void onClosed() {
+                        unregisterReceiver(receiver);
+                    }
+                });
+            }
+        });
+        
+        
         mServer.websocket("/logcat/stream", new WebSocketCallback() {
             Process process;
             Process kmsgProcess;
@@ -303,7 +388,7 @@ public class LoggyService extends Service {
                             final long start = System.currentTimeMillis();
                             String s;
                             SuRunner runner = new SuRunner();
-                            runner.addCommand("/system/bin/logcat -t 500 -b radio -b events -b system -b main");
+                            runner.addCommand("/system/bin/logcat -t 500 -b radio -b events -b main");
                             process = runner.runSuCommand(LoggyService.this);
                             DataInputStream dis = new DataInputStream(process.getInputStream());
                             while (null != (s = dis.readLine())) {
@@ -316,7 +401,7 @@ public class LoggyService extends Service {
                             
                             // now get the running log
                             runner = new SuRunner();
-                            runner.addCommand("/system/bin/logcat -b radio -b events -b system -b main");
+                            runner.addCommand("/system/bin/logcat -b radio -b events -b main");
                             process = runner.runSuCommand(LoggyService.this);
                             dis = new DataInputStream(process.getInputStream());
 
@@ -394,6 +479,7 @@ public class LoggyService extends Service {
         viewDir("/sdcard", Environment.getExternalStorageDirectory(), "sdcard");
         viewDir("/sdcard/.*?", Environment.getExternalStorageDirectory(), "sdcard");
         directory("/json/sdcard/.*?", Environment.getExternalStorageDirectory());
+        sms("/json/sms/.*?");
 
         mServer.directory(this, "/.*?", "site/");
         

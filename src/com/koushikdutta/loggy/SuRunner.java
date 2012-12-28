@@ -7,6 +7,7 @@ import java.util.HashMap;
 
 import android.content.Context;
 import android.os.Handler;
+import android.util.Log;
 
 public class SuRunner {
     HashMap<String, String> mEnvironment = new HashMap<String, String>();
