@@ -8,7 +8,7 @@ console.log("attempting connection...");
 
 // Write your code in the same way as for native WebSocket:
 var ws = new WebSocket(window.location.href.replace('http', 'ws') + '/stream');
-console.log(WebSocket);
+console.log(ws);
 ws.onopen = function() {
 	console.log('connected');
 };

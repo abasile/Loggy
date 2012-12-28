@@ -262,6 +262,7 @@ var colors = [ '#FFFFFF', '#FF0000', '#00FF00', '#0000FF', '#0FF000', '#000FF0',
 var tags = {};
 
 ws.onmessage = function(e) {
+	console.log("text received");
 	var parts = e.data.split(':', 2);
 	parts[0] = parts[0].replace('(', ' ').replace(')', ' ');
 	var processInfo = sscanf(parts[0], '%c/%s %d');
