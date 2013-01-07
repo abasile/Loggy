@@ -336,11 +336,11 @@ public class LoggyService extends Service {
             }
         });
 
-        mServer.websocket("/logcat/stream", new WebSocketRequestCallback() {
+
         
-        mServer.websocket("/sms/stream", new WebSocketCallback() {
+        mServer.websocket("/sms/stream", new WebSocketRequestCallback() {
             @Override
-            public void onConnected(final WebSocket webSocket) {
+            public void onConnected(final WebSocket webSocket, RequestHeaders headers) {
                 final BroadcastReceiver receiver = new BroadcastReceiver() {
                     public void onReceive(android.content.Context context, Intent intent) {
                         try {
@@ -376,8 +376,7 @@ public class LoggyService extends Service {
             }
         });
         
-        
-        mServer.websocket("/logcat/stream", new WebSocketCallback() {
+        mServer.websocket("/logcat/stream", new WebSocketRequestCallback() {
             Process process;
             Process kmsgProcess;
             @Override
