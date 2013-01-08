@@ -19,8 +19,16 @@ public class SmsManager {
 	    public static final String SENTBOX = "content://sms/sent";
 	    public static final String DRAFTS = "content://sms/drafts";
 	    public static final String ALL = "content://sms";
-	    private static final String COLUMNS[] = new String[] { "person", "address", "body", "date", "type", "status", "threadID" };
-	    private static final String SORT_ORDER = "date DESC";
+	    private static final String COLUMNS[] = new String[] { 
+	    	MessagesConsts.TextBasedSmsColumns.PERSON, 
+	    	MessagesConsts.TextBasedSmsColumns.ADDRESS, 
+	    	MessagesConsts.TextBasedSmsColumns.BODY, 
+	    	MessagesConsts.TextBasedSmsColumns.DATE,
+	    	MessagesConsts.TextBasedSmsColumns.TYPE, 
+	    	MessagesConsts.TextBasedSmsColumns.STATUS, 
+	    	MessagesConsts.TextBasedSmsColumns.THREAD_ID
+	    	};
+	    private static final String SORT_ORDER = "date DESC LIMIT 100";
 
 	    public SmsManager(Context baseContext) {
 	        _context = baseContext;

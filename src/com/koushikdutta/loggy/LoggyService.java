@@ -294,7 +294,8 @@ public class LoggyService extends Service {
 
         view("/logcat", "logcat");
         view("/camera", "camera");
-        view("/sms/.*?", "sms");
+        view("/sms/?.*?", "sms");
+
         
         mServer.websocket("/camera/stream", new WebSocketRequestCallback() {
             @Override
