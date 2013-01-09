@@ -69,7 +69,9 @@ public class SmsManager {
 	    	 return result;
 	    }
 	    
-	    public ArrayList<SMSThread> getThreads(){
+	    public ArrayList<SMSThread> getThreads(String where){
+            String folder = MessagesConsts.Conversation.CONTENT_URI;
+            Cursor c = _context.getContentResolver().query(Uri.parse(folder),null,where,null,SORT_ORDER );
 	    	
 			return null;
 	    }
