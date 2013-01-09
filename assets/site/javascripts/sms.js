@@ -16,7 +16,8 @@ loadcontent = function() {
 				".row.sms\n" +
 				"  .span6\n" +
 				"    span.message=sms.message\n" +
-				"  .span1.number=sms.number\n";
+				"  .span1.number=sms.number\n" +
+				"  .span.info=sms.info";
 			jade.render(format, {
 				sms: sms
 			}, function(err, data) {

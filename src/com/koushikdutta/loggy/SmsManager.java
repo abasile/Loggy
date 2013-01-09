@@ -3,6 +3,7 @@ package com.koushikdutta.loggy;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import android.content.Context;
@@ -26,7 +27,13 @@ public class SmsManager {
 	    	MessagesConsts.TextBasedSmsColumns.DATE,
 	    	MessagesConsts.TextBasedSmsColumns.TYPE, 
 	    	MessagesConsts.TextBasedSmsColumns.STATUS, 
-	    	MessagesConsts.TextBasedSmsColumns.THREAD_ID
+	    	MessagesConsts.TextBasedSmsColumns.THREAD_ID,
+	    	
+	    	MessagesConsts.TextBasedSmsColumns.DATE_SENT,
+	    	MessagesConsts.TextBasedSmsColumns.PERSON_ID,
+	    	MessagesConsts.TextBasedSmsColumns.SUBJECT,
+//	    	MessagesConsts.TextBasedSmsColumns.META_DATA,
+	    	MessagesConsts.TextBasedSmsColumns.SEEN
 	    	};
 	    private static final String SORT_ORDER = "date DESC LIMIT 100";
 
@@ -46,22 +53,15 @@ public class SmsManager {
 	            	 String person = Tools.getString(c, "person");
 	            	 Date date = Tools.getDateSeconds(c, "date");
 	            	 AppContact contact = new AppContact(address, person, _context);
-	            	 int status = -1;
-	            	 switch (Tools.getInt(c, "type")) {
-					case 1:
-						status = Sms.RECIEVED;
-						break;
-					case 2:
-						status = Sms.SENT;
-						break;
-					case 3:
-						status = Sms.DRAFT;
-						break;
-
-					default:
-						break;
-					}
-	            	 Sms sms = new Sms(date, body, contact, status);
+	            	 int status = (Tools.getInt(c, "type")) ;
+	            	 
+	            	 HashMap<String, String> info = new HashMap<String, String>();
+	            	 String[] cn = c.getColumnNames();
+	            	 for(int i = 0; i<cn.length;i++){
+	            		 info.put(cn[i], Tools.getString(c, cn[i]));
+	            	 }
+	            			 
+	            	 Sms sms = new Sms(date, body, contact, status, info);
 	            	 
 	            	 result.add(sms);
 	             }

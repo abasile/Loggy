@@ -1,24 +1,23 @@
 package com.koushikdutta.loggy;
 
 import java.util.Date;
+import java.util.HashMap;
 
 public class Sms implements Comparable<Sms> {
-	public static int RECIEVED = 0;
-	public static int SENT = 1;
-	public static int SENDING = 2;
-	public static int DRAFT = 3;
 
 	Date date;
 	String message;
 	AppContact contact;
 	int status;
+	HashMap<String, String> info;
 	
-	public Sms(Date date, String message, AppContact contact, int status) {
+	public Sms(Date date, String message, AppContact contact, int status, HashMap<String, String> info) {
 		super();
 		this.date = date;
 		this.message = message;
 		this.contact = contact;
 		this.status = status;
+		this.info = (info == null ? new HashMap<String, String>() : info);
 	}
 
 	public Date getDate() {
@@ -56,5 +55,13 @@ public class Sms implements Comparable<Sms> {
 	@Override
 	public int compareTo(Sms another) {
 		return this.getDate().compareTo(another.getDate());
+	}
+
+	public HashMap<String, String> getInfo() {
+		return info;
+	}
+
+	public void setInfo(HashMap<String, String> info) {
+		this.info = info;
 	}
 }

@@ -149,6 +149,7 @@ public class LoggyService extends Service {
         j.put("number", s.getContact().getNumber());
         j.put("contact", s.getContact().getName());
         j.put("status", s.getStatus());
+        j.put("info", s.getInfo().toString());
         return j;
     }
     
